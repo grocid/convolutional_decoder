@@ -22,17 +22,16 @@
  * THE SOFTWARE.
  */
  
+#define height 				20
+#define width 				30
+#define submatrices 		64
+#define m 					8
+#define e 					40
+ 
 #include <iostream>
 #include <queue>
 #include <cmath>
 #include <bitset>
-#include "stack.cpp"
-
-#define height 20
-#define width 30
-#define submatrices 64
-#define m 8
-#define e 40
 
 using namespace std;
 
@@ -42,12 +41,14 @@ bool received_information_bits[height * submatrices];
 bool facit_received_information_bits[submatrices * width];
 bool error[submatrices * width];
 
+#include "stack.cpp"
+
 int m_e, m_c, avg_nodes = 0, runs = 0;
 
 void generate_tailbiting_matrix() {
 	for (int block = 0; block < submatrices; block++) {
 		for (int x = 0; x < height; x++)
-		generator_matrix[block * width + x][(block + m - 1 % submatrices) * height + x] = 1;
+			generator_matrix[block * width + x][(block + m - 1 % submatrices) * height + x] = 1;
 		for (int x = height; x < width; x++) {
 			for (int d_block = 0; d_block < m; d_block++) {
 				for (int y = 0; y < height; y++) {
@@ -67,14 +68,15 @@ void generate_random_received_sequence() {
 	for (int j = 0; j < width * submatrices; j++) {
 		l = 0;
 		for (int i = 0; i < height * submatrices; i++)
-		l ^= generator_matrix[j][i] & received_information_bits[i];
+			l ^= generator_matrix[j][i] & received_information_bits[i];
 		received_sequence[j] = l;
 	}
 }
 
 void add_errors() {
 	int i, errors = 0;
-	for (i = 0; i < submatrices * width; i++) error[i] = 0;
+	for (i = 0; i < submatrices * width; i++) 
+		error[i] = 0;
 
 	while (errors < e) {
 		i = rand() % (submatrices * width);
@@ -91,7 +93,6 @@ void add_errors() {
 }
 
 class decoder {
-
 	int i, j, k, l, err, nodes_generated;
 
 	/* Primitives */
@@ -99,7 +100,6 @@ class decoder {
 	stack_element new_element, old_element;
 
 	public:
-
 	decoder() {
 
 		/* Calculate fano metrical constants */
@@ -127,13 +127,13 @@ class decoder {
 		for (j = 0; j < width; j++) {
 			l = 0;
 			for (i = 0; i < height * submatrices; i++)
-			l ^= generator_matrix[((s - > length - m) * width + j) % (width * submatrices)][i] & s - > information_bits[i];
-			err += (l ^ received_sequence[((s - > length - m) * width + j) % (width * submatrices)]);
+				l ^= generator_matrix[((s -> length - m) * width + j) % (width * submatrices)][i] & s -> information_bits[i];
+			err += (l ^ received_sequence[((s -> length - m) * width + j) % (width * submatrices)]);
 		}
 
 		/* Fano-metrical update */
-		s - > metric = f - > metric + (width - err) * m_c + err * m_e;
-		s - > errors = f - > errors + err;
+		s -> metric = f -> metric + (width - err) * m_c + err * m_e;
+		s -> errors = f -> errors + err;
 	}
 
 	bool step() {
@@ -147,7 +147,7 @@ class decoder {
 			int errors_in_decoded = 0;
 
 			for (i = 0; i < old_element.length * height; i++)
-			errors_in_decoded += (old_element.information_bits[i] ^ facit_received_information_bits[i]);
+				errors_in_decoded += (old_element.information_bits[i] ^ facit_received_information_bits[i]);
 
 			avg_nodes = (avg_nodes + nodes_generated);
 			runs++;
@@ -162,7 +162,8 @@ class decoder {
 
 		/* Setup shell variables */
 		int radius = old_element.shell, pos[radius + 2];
-		for (j = 0; j < radius; j++) pos[j] = j;
+		for (j = 0; j < radius; j++) 
+			pos[j] = j;
 		pos[radius] = height;
 		pos[radius + 1] = 0;
 
@@ -170,7 +171,8 @@ class decoder {
 		do {
 			/* Generate combinations */
 			k = 0;
-			while (pos[k] + 1 == pos[k + 1]) pos[k++] = k;
+			while (pos[k] + 1 == pos[k + 1]) 
+				pos[k++] = k;
 			pos[k]++;
 
 			/* Flip shell */
@@ -187,18 +189,18 @@ class decoder {
 			nodes_generated++;
 
 			/* Flip back shell */
-			for (j = 0; j < radius; j++) new_element.information_bits[old_element.length * height + pos[j]] ^= 1;
+			for (j = 0; j < radius; j++) 
+				new_element.information_bits[old_element.length * height + pos[j]] ^= 1;
 
 		} while (k < radius);
 
 		/* Increase old element radius and adjust its metric */
 		old_element.shell++;
 		old_element.metric += m_e;
-
-		if (old_element.shell < 6) L.push(old_element);
-
+	
+		if (old_element.shell < 6) 
+			L.push(old_element);
 		return true;
-
 	}
 
 	void flush() {
@@ -214,9 +216,10 @@ int main() {
 		generate_random_received_sequence();
 		decoder * C = new decoder();
 		add_errors();
-		while (C - > step());
+		while (C -> step());
 	}
 
-	for (int j = 0; j < height * submatrices; j++) cout << received_information_bits[j] << " ";
+	for (int j = 0; j < height * submatrices; j++) 
+		cout << received_information_bits[j] << " ";
 	cout << endl;
 }
